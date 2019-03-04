@@ -1,0 +1,103 @@
+package com.chinazhang.zjy.todo;
+
+import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+
+import com.chinazhang.zjy.todo.databinding.FragmentTodoListBinding;
+import com.chinazhang.zjy.todo.databinding.ItemTodoBinding;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.zjy.simplemodule.adapter.BindingAdapter;
+import com.zjy.simplemodule.base.fragment.AbsBindingFragment;
+import com.zjy.simplemodule.utils.SPUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, FragmentTodoListBinding> implements View.OnClickListener {
+
+    private BindingAdapter<TodoModel, ItemTodoBinding> adapter;
+
+    public static TodoListFragment newInstance() {
+        Bundle args = new Bundle();
+        TodoListFragment fragment = new TodoListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    protected void observe() {
+
+    }
+
+    @Override
+    public int layoutId() {
+        return R.layout.fragment_todo_list;
+    }
+
+    @Override
+    public void init(Bundle savedInstanceState) {
+        adapter = new BindingAdapter<TodoModel, ItemTodoBinding>(getSelfActivity()) {
+            @Override
+            protected void convert(ItemTodoBinding binding, TodoModel todoModel, int position) {
+                binding.itemTodoContent.setText(todoModel.getContent());
+                binding.itemTodoTime.setText(String.valueOf(todoModel.getCreateTime()));
+                binding.itemTodoTitle.setText(todoModel.getTitle());
+            }
+
+            @Override
+            protected int getLayoutId(int type) {
+                return R.layout.item_todo;
+            }
+        };
+        adapter.setLoadEnable(false);
+        binding.recyclerTodo.setLayoutManager(new LinearLayoutManager(getSelfActivity()));
+        binding.recyclerTodo.setAdapter(adapter);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void initEvent() {
+        binding.fabAdd.setOnClickListener(this);
+        binding.refreshTodo.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                String data = SPUtils.getInstance().getString(Contracts.TODO_DATA_NAME);
+                Log.e(TAG, "onRefresh: " + data);
+                List<TodoModel> list = new Gson().fromJson(data, new TypeToken<List<TodoModel>>(){}.getType());
+                ArrayList<TodoModel> modelList = new ArrayList<>(list);
+                adapter.setList(modelList);
+                if (binding.refreshTodo.isRefreshing())
+                    binding.refreshTodo.setRefreshing(false);
+            }
+        });
+    }
+
+    @Override
+    public void initData() {
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.fab_add:
+                String oldData = SPUtils.getInstance().getString(Contracts.TODO_DATA_NAME);
+                List<TodoModel> list = new Gson().fromJson(oldData, new TypeToken<List<TodoModel>>(){}.getType());
+                ArrayList<TodoModel> modelList = new ArrayList<>(list);
+                TodoModel model = new TodoModel();
+                model.setTitle("new" + modelList.size());
+                model.setContent("new content" + modelList.size());
+                modelList.add(model);
+                String data = new Gson().toJson(modelList, new TypeToken<List<TodoModel>>(){}.getType());
+                SPUtils.getInstance().putString(Contracts.TODO_DATA_NAME, data);
+                break;
+        }
+    }
+}
