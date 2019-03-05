@@ -8,17 +8,19 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+
 @Dao
 public interface TodoDao {
 
     @Query("SELECT * FROM TodoModel")
-    List<TodoModel> getTodoList();
+    Flowable<List<TodoModel>> getTodoList();
 
     @Insert
-    void addTodo(TodoModel todoModel);
+    long addTodo(TodoModel todoModel);
 
     @Delete
-    int deleteTodo(TodoModel todoModel);
+    void deleteTodo(TodoModel todoModel);
 
     @Update
     int updateTodo(TodoModel todoModel);

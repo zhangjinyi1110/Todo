@@ -82,6 +82,7 @@ ext {
             "gson":"com.google.code.gson:gson:$gsonVersion",
             "roomRuntime":"android.arch.persistence.room:runtime:$roomVersion",
             "roomCompiler":"android.arch.persistence.room:compiler:$roomVersion",
+            "roomRxjava2":"android.arch.persistence.room:rxjava2:$roomVersion",
             "autodispose":"com.uber.autodispose:autodispose:$autodispose",
             "autodispose-android-archcomponents":"com.uber.autodispose:autodispose-android-archcomponents:$autodisposeAndroidArchcomponents"
     ]

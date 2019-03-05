@@ -5,20 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import com.chinazhang.zjy.todo.databinding.FragmentTodoListBinding;
 import com.chinazhang.zjy.todo.databinding.ItemTodoBinding;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.zjy.simplemodule.adapter.BindingAdapter;
 import com.zjy.simplemodule.base.fragment.AbsBindingFragment;
-import com.zjy.simplemodule.utils.SPUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, FragmentTodoListBinding> implements View.OnClickListener {
@@ -53,10 +46,24 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
     public void init(Bundle savedInstanceState) {
         adapter = new BindingAdapter<TodoModel, ItemTodoBinding>(getSelfActivity()) {
             @Override
-            protected void convert(ItemTodoBinding binding, TodoModel todoModel, int position) {
+            protected void convert(ItemTodoBinding binding, final TodoModel todoModel, int position) {
                 binding.itemTodoContent.setText(todoModel.getContent());
                 binding.itemTodoTime.setText(String.valueOf(todoModel.getCreateTime()));
                 binding.itemTodoTitle.setText(todoModel.getTitle());
+                binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        viewModel.deleteTodo(todoModel);
+                    }
+                });
+                binding.itemTodoContent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String c = String.valueOf(System.currentTimeMillis());
+                        todoModel.setContent(todoModel.getContent() + c);
+                        viewModel.updateTodo(todoModel);
+                    }
+                });
             }
 
             @Override
