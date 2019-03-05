@@ -48,6 +48,7 @@ ext {
     autodisposeVersion = "0.8.0"
     autodispose = autodisposeVersion
     autodisposeAndroidArchcomponents = autodisposeVersion
+    roomVersion = "1.0.0"
     gsonVersion = "2.8.5"
 
     android = [
@@ -79,6 +80,8 @@ ext {
             "adapter-rxjava2":"com.squareup.retrofit2:adapter-rxjava2:$adapterRxjava2",
             "support-v4":"com.android.support:support-v4:$supportV4",
             "gson":"com.google.code.gson:gson:$gsonVersion",
+            "roomRuntime":"android.arch.persistence.room:runtime:$roomVersion",
+            "roomCompiler":"android.arch.persistence.room:compiler:$roomVersion",
             "autodispose":"com.uber.autodispose:autodispose:$autodispose",
             "autodispose-android-archcomponents":"com.uber.autodispose:autodispose-android-archcomponents:$autodisposeAndroidArchcomponents"
     ]

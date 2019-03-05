@@ -1,6 +1,8 @@
 package com.chinazhang.zjy.todo;
 
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -32,7 +34,14 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
 
     @Override
     protected void observe() {
-
+        viewModel.getTodoListData().observe(this, new Observer<List<TodoModel>>() {
+            @Override
+            public void onChanged(@Nullable List<TodoModel> todoModels) {
+                if (todoModels != null) {
+                    adapter.setList(todoModels);
+                }
+            }
+        });
     }
 
     @Override
@@ -67,11 +76,7 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
         binding.refreshTodo.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                String data = SPUtils.getInstance().getString(Contracts.TODO_DATA_NAME);
-                Log.e(TAG, "onRefresh: " + data);
-                List<TodoModel> list = new Gson().fromJson(data, new TypeToken<List<TodoModel>>(){}.getType());
-                ArrayList<TodoModel> modelList = new ArrayList<>(list);
-                adapter.setList(modelList);
+                viewModel.queryTodoList();
                 if (binding.refreshTodo.isRefreshing())
                     binding.refreshTodo.setRefreshing(false);
             }
@@ -80,7 +85,12 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
 
     @Override
     public void initData() {
+        viewModel.queryTodoList();
+    }
 
+    @Override
+    public boolean isLazy() {
+        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -88,15 +98,16 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fab_add:
-                String oldData = SPUtils.getInstance().getString(Contracts.TODO_DATA_NAME);
-                List<TodoModel> list = new Gson().fromJson(oldData, new TypeToken<List<TodoModel>>(){}.getType());
-                ArrayList<TodoModel> modelList = new ArrayList<>(list);
-                TodoModel model = new TodoModel();
-                model.setTitle("new" + modelList.size());
-                model.setContent("new content" + modelList.size());
-                modelList.add(model);
-                String data = new Gson().toJson(modelList, new TypeToken<List<TodoModel>>(){}.getType());
-                SPUtils.getInstance().putString(Contracts.TODO_DATA_NAME, data);
+//                String oldData = SPUtils.getInstance().getString(Contracts.TODO_DATA_NAME);
+//                List<TodoModel> list = new Gson().fromJson(oldData, new TypeToken<List<TodoModel>>(){}.getType());
+//                ArrayList<TodoModel> modelList = new ArrayList<>(list);
+//                TodoModel model = new TodoModel();
+//                model.setTitle("new" + modelList.size());
+//                model.setContent("new content" + modelList.size());
+//                modelList.add(model);
+//                String data = new Gson().toJson(modelList, new TypeToken<List<TodoModel>>(){}.getType());
+//                SPUtils.getInstance().putString(Contracts.TODO_DATA_NAME, data);
+                viewModel.addTodo(new TodoModel("content", "title"));
                 break;
         }
     }
