@@ -10,26 +10,36 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <com.chinazhang.zjy.todo.widget.ScrollView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/item_todo_title"
-            android:padding="8dp"/>
+            android:id="@+id/item_todo_layout">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/item_todo_content"
-            android:layout_marginStart="18dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/item_todo_time"
-            android:padding="8dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/item_todo_title"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="17sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/item_todo_content"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="3"
+                    android:ellipsize="end"/>
+
+            </LinearLayout>
+
+        </com.chinazhang.zjy.todo.widget.ScrollView>
 
     </LinearLayout>
 </layout>

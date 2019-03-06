@@ -36,7 +36,7 @@ ext {
     supportV4 = sdkVersion
     design = sdkVersion
 //    cardviewV7 = sdkVersion
-    rxjava2 = "2.0.6"
+    rxjava2 = "2.1.7"
     rxandroid2 = "2.0.1"
     disklrucache = "2.0.2"
     lifecycle = "1.1.0"

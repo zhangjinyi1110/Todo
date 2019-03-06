@@ -7,4 +7,6 @@
     <color name="colorBlack">#000000</color>
     <color name="colorA">#000055</color>
     <color name="colorTBlack">#96000000</color>
+    <color name="colorRed">#ff0101</color>
+    <color name="colorGray">#c3c3c3</color>
 </resources>

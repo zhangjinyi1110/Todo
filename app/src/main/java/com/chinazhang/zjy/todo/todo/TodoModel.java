@@ -1,4 +1,4 @@
-package com.chinazhang.zjy.todo;
+package com.chinazhang.zjy.todo.todo;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
@@ -16,6 +16,7 @@ public class TodoModel {
     private long remindTime;//需要提醒的时间
     private int remindType;//提醒的类型
     private long performTime;//完成时间
+    private boolean remind;//是否需要提醒
 
     public TodoModel(String content, String title) {
         this.content = content;
@@ -93,5 +94,13 @@ public class TodoModel {
 
     public void setPerformTime(long performTime) {
         this.performTime = performTime;
+    }
+
+    public void setRemind(boolean remind) {
+        this.remind = remind;
+    }
+
+    public boolean getRemind() {
+        return remind;
     }
 }

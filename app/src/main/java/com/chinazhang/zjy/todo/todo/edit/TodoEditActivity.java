@@ -1,13 +1,12 @@
-package com.chinazhang.zjy.todo;
+package com.chinazhang.zjy.todo.todo.edit;
 
 import android.support.v4.app.Fragment;
 
 import com.zjy.simplemodule.base.activity.SimpleActivity;
 
-public class TodoListActivity extends SimpleActivity {
-
+public class TodoEditActivity extends SimpleActivity {
     @Override
     protected Fragment getFragment() {
-        return TodoListFragment.newInstance();
+        return TodoEditFragment.newInstance();
     }
 }

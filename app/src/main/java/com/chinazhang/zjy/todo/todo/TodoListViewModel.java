@@ -1,4 +1,4 @@
-package com.chinazhang.zjy.todo;
+package com.chinazhang.zjy.todo.todo;
 
 import android.app.Application;
 import android.arch.lifecycle.MutableLiveData;
@@ -11,6 +11,7 @@ import java.util.List;
 public class TodoListViewModel extends BaseViewModel<TodoListRepository> {
 
     private MutableLiveData<List<TodoModel>> todoListData;
+    private MutableLiveData<TodoModel> queryData;
 
     public TodoListViewModel(@NonNull Application application) {
         super(application);
@@ -20,6 +21,12 @@ public class TodoListViewModel extends BaseViewModel<TodoListRepository> {
         if (todoListData == null)
             todoListData = repository.getTodoListData();
         return todoListData;
+    }
+
+    public MutableLiveData<TodoModel> getQueryData() {
+        if (queryData == null)
+            queryData = repository.getQueryData();
+        return queryData;
     }
 
     public void addTodo(TodoModel model) {
@@ -36,6 +43,10 @@ public class TodoListViewModel extends BaseViewModel<TodoListRepository> {
 
     public void queryTodoList() {
         repository.queryTodoList();
+    }
+
+    public void queryTodo(long id) {
+        repository.queryTodo(id);
     }
 
 }

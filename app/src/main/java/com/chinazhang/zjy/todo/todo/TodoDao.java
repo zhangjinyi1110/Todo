@@ -1,4 +1,4 @@
-package com.chinazhang.zjy.todo;
+package com.chinazhang.zjy.todo.todo;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
@@ -24,5 +24,8 @@ public interface TodoDao {
 
     @Update
     int updateTodo(TodoModel todoModel);
+
+    @Query("SELECT * FROM TodoModel WHERE id=:id")
+    Flowable<TodoModel> queryTodo(long id);
 
 }
