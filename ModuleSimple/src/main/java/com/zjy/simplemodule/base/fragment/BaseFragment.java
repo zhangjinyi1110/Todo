@@ -47,7 +47,7 @@ public abstract class BaseFragment extends Fragment implements IFragment {
         initEvent();
         if (!isLazy() || getUserVisibleHint()) {
             initData();
-            isLazy(false);
+            setLazy(false);
         }
         isFirst = false;
         return view;
@@ -58,7 +58,7 @@ public abstract class BaseFragment extends Fragment implements IFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && !isFirst && isLazy()) {
             initData();
-            isLazy(false);
+            setLazy(false);
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class BaseFragment extends Fragment implements IFragment {
         return isLazy;
     }
 
-    public void isLazy(boolean lazy) {
+    public void setLazy(boolean lazy) {
         isLazy = lazy;
     }
 

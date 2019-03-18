@@ -100,7 +100,7 @@ public class TodoModel {
         this.remind = remind;
     }
 
-    public boolean getRemind() {
+    public boolean isRemind() {
         return remind;
     }
 }

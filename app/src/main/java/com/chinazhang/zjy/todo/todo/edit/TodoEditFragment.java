@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CompoundButton;
 
 import com.chinazhang.zjy.todo.R;
 import com.chinazhang.zjy.todo.databinding.FragmentTodoEditBinding;
@@ -35,6 +36,12 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
                     model = todoModel;
                     binding.todoContent.setText(model.getContent());
                     binding.todoTitle.setText(model.getTitle());
+                    boolean flag = model.isRemind();
+                    binding.todoRemind.setChecked(flag);
+                    if (flag) {
+                        binding.todoRemindTime.setText(String.valueOf(model.getRemindTime()));
+                        binding.todoRemindType.setText(String.valueOf(model.getRemindType()));
+                    }
                 }
             }
         });
@@ -47,6 +54,7 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
 
     @Override
     public void init(Bundle savedInstanceState) {
+        setLazy(false);
         type = getSelfActivity().getIntent().getStringExtra("action");
         id = getSelfActivity().getIntent().getLongExtra("id", -1);
     }
@@ -54,6 +62,12 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
     @Override
     public void initEvent() {
         binding.todoSave.setOnClickListener(this);
+        binding.todoRemind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                binding.remindGroup.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     @Override
@@ -80,15 +94,30 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
         } else if (TextUtils.isEmpty(binding.todoTitle.getText())) {
             text = "标题不能为空";
         } else {
+            boolean checked = binding.todoRemind.isChecked();
             if (type.equals("add")) {
                 model = new TodoModel(binding.todoContent.getText().toString(), binding.todoTitle.getText().toString());
-                model.setRemind(binding.todoRemind.isChecked());
+                model.setRemind(checked);
+                if (checked) {
+                    model.setRemindTime(System.currentTimeMillis());
+                    model.setRemindType(0x01);
+                } else {
+                    model.setRemindTime(0);
+                    model.setRemindType(0);
+                }
                 viewModel.addTodo(model);
                 text = "添加成功";
             } else {
                 model.setContent(binding.todoContent.getText().toString());
                 model.setTitle(binding.todoTitle.getText().toString());
-                model.setRemind(binding.todoRemind.isChecked());
+                model.setRemind(checked);
+                if (checked) {
+                    model.setRemindTime(System.currentTimeMillis());
+                    model.setRemindType(0x01);
+                } else {
+                    model.setRemindTime(0);
+                    model.setRemindType(0);
+                }
                 viewModel.updateTodo(model);
                 text = "修改成功";
             }
@@ -99,8 +128,4 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
             getSelfActivity().finish();
     }
 
-    @Override
-    public boolean isLazy() {
-        return false;
-    }
 }

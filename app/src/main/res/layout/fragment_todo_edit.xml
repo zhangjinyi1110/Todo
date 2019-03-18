@@ -20,7 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/todo_title"
-                android:hint="title"
+                android:hint="@string/text_todo_title"
                 android:inputType="text"
                 tools:ignore="Autofill" />
 
@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/todo_content"
-                android:hint="content"
+                android:hint="@string/text_todo_content"
                 android:inputType="text"
                 tools:ignore="Autofill" />
 
@@ -43,14 +43,73 @@
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="是否需要提醒"
+            android:text="@string/text_is_remind"
             android:id="@+id/todo_remind"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:id="@+id/remind_group"
+            android:visibility="gone"
+            tools:ignore="DisableBaselineAlignment">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_remind_type"
+                    android:gravity="center"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:id="@+id/todo_remind_type"
+                    android:textColor="@color/colorWhite"
+                    android:text="弹窗提示"
+                    android:background="@drawable/popup_btn_bg"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_remind_time"
+                    android:gravity="center"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:id="@+id/todo_remind_time"
+                    android:textColor="@color/colorWhite"
+                    android:text="一天后"
+                    android:background="@drawable/popup_btn_bg"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/todo_save"
-            android:text="保存"/>
+            android:layout_marginTop="15dp"
+            android:text="@string/text_save"/>
 
     </LinearLayout>
 </layout>

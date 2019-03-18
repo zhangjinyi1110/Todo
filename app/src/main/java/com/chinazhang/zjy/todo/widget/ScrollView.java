@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,16 +27,14 @@ public class ScrollView extends FrameLayout {
     private TextView more;//更多键
 
     private OnItemClickListener itemClickListener;//点击button容器里的view的回调
-    private OnBtnChangeListener btnChangeListener;
 
     private int start = 0;//开始点击的x坐标
     private int scroll = 0;//滑动的距离
-    private int tb = 0;//开始点击时的y坐标
-    private long startTime = 0;
-    private long endTime = 0;
     private boolean isBtnClose = false;//是否允许在button容器里滑动关闭
     private boolean isOpenBtn = false;//是否打开button容器
     private OnClickListener listener;
+    private OnBtnChangeListener btnChangeListener;
+    private ValueAnimator animator;
 
     public final static int TYPE_OK = 0;
     public final static int TYPE_CANCEL = 1;
@@ -121,18 +120,15 @@ public class ScrollView extends FrameLayout {
                     itemClickListener.onItemClick(view, TYPE_CANCEL);
             }
         });
-//        ok.setOnTouchListener(touchListener);
-//        cancel.setOnTouchListener(touchListener);
-//        more.setOnTouchListener(touchListener);
+        content.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("aaa", "onClick: " + scroll + "/" + start);
+                if (listener != null && content.getChildAt(0) != null)
+                    listener.onClick(content.getChildAt(0));
+            }
+        });
     }
-
-//    private OnTouchListener touchListener = new OnTouchListener() {
-//        @SuppressLint("ClickableViewAccessibility")
-//        @Override
-//        public boolean onTouch(View v, MotionEvent event) {
-//            return false;
-//        }
-//    };
 
     @SuppressLint("DrawAllocation")
     @Override
@@ -177,48 +173,40 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                start = (int) ev.getX();
+                scroll = start;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                scroll = (int) (ev.getX() - start + getScroll());
+                break;
+            case MotionEvent.ACTION_UP:
+                start = 0;
+                scroll = getScroll();
+                break;
+        }
+        //判断是否打开BtnLayout
+        if (isOpenBtn) {
+            //滑动距离超过5dp判定用户意向为滑动
+            if (scroll != start && scroll >= getScroll() + SizeUtils.dp2px(context, 5)) {
+                //起点在contentView部分是直接滑动，在BtnLayout部分要判断是否可以滑动关闭
+                if (start <= getMeasuredWidth() - getBtnWidth()) {
+                    return true;
+                } else if (isBtnClose) {
+                    return true;
+                }
+            }
+        } else if (scroll != start && scroll <= getScroll() - SizeUtils.dp2px(context, 5)) {
+            return true;
+        }
         return super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        //判断是否打开button容器和是否允许button容器关闭
-        if ((isBtnClose && isOpenBtn) || listener != null) {
-            switch (ev.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    start = (int) (ev.getX() - scroll);
-                    tb = (int) ev.getY();
-                    startTime = System.currentTimeMillis();
-                    getParent().requestDisallowInterceptTouchEvent(true);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if ((int) (ev.getX()) == start && !isOpenBtn) {
-                        if (listener != null) {
-                            listener.onClick(content);
-                        }
-                        return true;
-                    } else if (isOpenBtn && ev.getX() - (content.getMeasuredWidth() - getBtnWidth()) <= 0) {
-                        if (listener != null) {
-                            listener.onClick(content);
-                        }
-                        return true;
-                    }
-                case MotionEvent.ACTION_MOVE:
-                    if (isTB(ev.getRawY())) {
-                        getParent().requestDisallowInterceptTouchEvent(false);
-                        return false;
-                    } else {
-                        getParent().requestDisallowInterceptTouchEvent(true);
-                    }
-                    //避免在button容器中消费了事件
-                    if (((int) ev.getX() - start + getBtnWidth()) <= 0) {
-                        return super.dispatchTouchEvent(ev);
-                    } else {
-                        return onTouchEvent(ev);
-                    }
-                case MotionEvent.ACTION_CANCEL:
-                    return onTouchEvent(ev);
-            }
+        if (animator != null && animator.isRunning()) {
+            return false;
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -228,51 +216,63 @@ public class ScrollView extends FrameLayout {
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                start = (int) (ev.getX() - scroll);
-                tb = (int) ev.getY();
-                startTime = System.currentTimeMillis();
-                break;
-            case MotionEvent.ACTION_UP:
-                endTime = System.currentTimeMillis();
-                if (endTime - startTime <= 300) {
-                    int off = (int) ev.getX() - start + scroll;
-                    if (Math.abs(off) >= getBtnWidth() / 3 && !isOpenBtn) {
-                        isOpenBtn = true;
-                        if (btnChangeListener != null)
-                            btnChangeListener.onChange(isOpenBtn);
-                        normalPosition(scroll, -getBtnWidth());
-                        break;
+                start = (int) ev.getX();
+                getParent().requestDisallowInterceptTouchEvent(true);
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                //超过一定距离，判断用户想要上下滑动
+                if (isTB(ev.getRawY())) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    return false;
+                } else {
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                scroll = (int) (ev.getX() - start + getScroll());
+                if (isOpenBtn) {
+                    if (scroll < getScroll()) {
+                        scroll = getScroll();
+                    } else if (scroll > 0) {
+                        scroll = 0;
+                    }
+                } else {
+                    if (scroll > getScroll()) {
+                        scroll = getScroll();
+                    } else if (scroll < -getBtnWidth()) {
+                        scroll = -getBtnWidth();
                     }
                 }
-                startTime = 0;
-            case MotionEvent.ACTION_CANCEL:
-                //超过三分之二时打开，否则关闭
-                if (isScroll(2)) {
-                    isOpenBtn = false;
-                    if (btnChangeListener != null)
-                        btnChangeListener.onChange(isOpenBtn);
-                    normalPosition(scroll, 0);
-                } else {
-                    isOpenBtn = true;
-                    if (btnChangeListener != null)
-                        btnChangeListener.onChange(isOpenBtn);
-                    normalPosition(scroll, -getBtnWidth());
-                }
-                break;
-            case MotionEvent.ACTION_MOVE:
-                scroll = (int) (ev.getX() - start);
-                if (scroll > 0)
-                    scroll = 0;
-                else if (scroll < -getBtnWidth())
-                    scroll = -getBtnWidth();
                 requestLayout();
-                break;
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                if (isOpenBtn) {
+                    if (scroll >= -getBtnWidth() / 3 * 2) {
+                        isOpenBtn = false;
+                        if (btnChangeListener != null) {
+                            btnChangeListener.onChange(false);
+                        }
+                        normalPosition(scroll, getScroll());
+                    } else {
+                        normalPosition(scroll, -getBtnWidth());
+                    }
+                } else {
+                    if (scroll <= -getBtnWidth() / 3) {
+                        isOpenBtn = true;
+                        if (btnChangeListener != null) {
+                            btnChangeListener.onChange(true);
+                        }
+                        normalPosition(scroll, getScroll());
+                    } else {
+                        normalPosition(scroll, 0);
+                    }
+                }
+                return true;
         }
         return true;
     }
 
     private void normalPosition(int start, int end) {
-        ValueAnimator animator = ValueAnimator.ofInt(start, end);
+        animator = ValueAnimator.ofInt(start, end);
         animator.setDuration(Math.abs(start - end));
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -291,14 +291,13 @@ public class ScrollView extends FrameLayout {
         return !(evY >= lt[1] && evY <= lt[1] + getMeasuredHeight());
     }
 
+    private int getScroll() {
+        return isOpenBtn ? -getBtnWidth() : 0;
+    }
+
     //获取button容器最大长度
     private int getBtnWidth() {
         return getMeasuredWidth() / 5 * 2;
-    }
-
-    //判断是否要滑动
-    private boolean isScroll(int percent) {
-        return scroll > -getBtnWidth() / 3 * percent;
     }
 
     //设置内容view
@@ -436,9 +435,10 @@ public class ScrollView extends FrameLayout {
             return;
         }
         isOpenBtn = true;
+        if (btnChangeListener != null) {
+            btnChangeListener.onChange(true);
+        }
         scroll = -getBtnWidth();
-        if (btnChangeListener != null)
-            btnChangeListener.onChange(isOpenBtn);
         requestLayout();
     }
 
@@ -447,9 +447,10 @@ public class ScrollView extends FrameLayout {
             return;
         }
         isOpenBtn = false;
+        if (btnChangeListener != null) {
+            btnChangeListener.onChange(false);
+        }
         scroll = 0;
-        if (btnChangeListener != null)
-            btnChangeListener.onChange(isOpenBtn);
         requestLayout();
     }
 
@@ -458,10 +459,7 @@ public class ScrollView extends FrameLayout {
     }
 
     public void setContentListener(OnClickListener listener) {
-        if (listener != null && content != null) {
-            this.listener = listener;
-            content.setOnClickListener(listener);
-        }
+        this.listener = listener;
     }
 
     public void setBtnChangeListener(OnBtnChangeListener btnChangeListener) {

@@ -3,4 +3,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_remind_type">提醒类型</string>
+    <string name="text_save">保存</string>
+    <string name="text_remind_time">提醒时间</string>
+    <string name="text_is_remind">是否需要提醒</string>
+    <string name="text_todo_content">content</string>
+    <string name="text_todo_title">title</string>
 </resources>

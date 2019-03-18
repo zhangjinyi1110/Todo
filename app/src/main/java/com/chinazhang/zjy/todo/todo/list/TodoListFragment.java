@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.chinazhang.zjy.todo.R;
@@ -33,7 +34,7 @@ import java.util.Map;
 public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, FragmentTodoListBinding> implements View.OnClickListener {
 
     private BindingAdapter<TodoModel, ItemTodoBinding> adapter;
-    private Map<Long, Boolean> openMap;
+    private Map<String, Boolean> openMap;
 
     public static TodoListFragment newInstance() {
         Bundle args = new Bundle();
@@ -62,12 +63,13 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
     @SuppressLint("UseSparseArrays")
     @Override
     public void init(Bundle savedInstanceState) {
+        setLazy(false);
         openMap = new HashMap<>();
         adapter = new BindingAdapter<TodoModel, ItemTodoBinding>(getSelfActivity()) {
             @Override
-            protected void convert(ItemTodoBinding binding, final TodoModel todoModel, int position) {
-                if (!openMap.containsKey(todoModel.getId())) {
-                    openMap.put(todoModel.getId(), false);
+            protected void convert(ItemTodoBinding binding, final TodoModel todoModel, final int position) {
+                if (!openMap.containsKey(String.valueOf(todoModel.getId()))) {
+                    openMap.put(String.valueOf(todoModel.getId()), false);
                 }
                 binding.itemTodoContent.setText(todoModel.getContent());
                 binding.itemTodoTitle.setText(todoModel.getTitle());
@@ -106,17 +108,18 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
                         }
                     }
                 });
-                if (openMap.get(todoModel.getId())) {
+                Boolean flag = openMap.get(String.valueOf(todoModel.getId()));
+                binding.itemTodoLayout.setBtnChangeListener(new ScrollView.OnBtnChangeListener() {
+                    @Override
+                    public void onChange(boolean flag) {
+                        openMap.put(String.valueOf(todoModel.getId()), flag);
+                    }
+                });
+                if (flag != null && flag) {
                     binding.itemTodoLayout.openBtn();
                 } else {
                     binding.itemTodoLayout.closeBtn();
                 }
-                binding.itemTodoLayout.setBtnChangeListener(new ScrollView.OnBtnChangeListener() {
-                    @Override
-                    public void onChange(boolean flag) {
-                        openMap.put(todoModel.getId(), flag);
-                    }
-                });
                 binding.itemTodoLayout.setContentListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -172,11 +175,6 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
     @Override
     public void initData() {
         viewModel.queryTodoList();
-    }
-
-    @Override
-    public boolean isLazy() {
-        return false;
     }
 
     @Override
