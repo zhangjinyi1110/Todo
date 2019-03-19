@@ -16,6 +16,9 @@ public interface TodoDao {
     @Query("SELECT * FROM TodoModel")
     Flowable<List<TodoModel>> getTodoList();
 
+    @Query("SELECT * FROM TodoModel WHERE createTime>=:startTime AND createTime<=:endTime")
+    Flowable<List<TodoModel>> getTodoList(long startTime, long endTime);
+
     @Insert
     long addTodo(TodoModel todoModel);
 

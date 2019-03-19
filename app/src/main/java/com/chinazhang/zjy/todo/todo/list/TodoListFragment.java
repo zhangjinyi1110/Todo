@@ -35,12 +35,23 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
 
     private BindingAdapter<TodoModel, ItemTodoBinding> adapter;
     private Map<String, Boolean> openMap;
+    private String date;
 
-    public static TodoListFragment newInstance() {
+    public static TodoListFragment newInstance(String date) {
         Bundle args = new Bundle();
+        args.putString("date", date);
         TodoListFragment fragment = new TodoListFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            date = bundle.getString("date");
+        }
     }
 
     @Override
@@ -165,7 +176,7 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
         binding.refreshTodo.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.queryTodoList();
+                viewModel.queryTodoList(date);
                 if (binding.refreshTodo.isRefreshing())
                     binding.refreshTodo.setRefreshing(false);
             }
@@ -174,7 +185,7 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
 
     @Override
     public void initData() {
-        viewModel.queryTodoList();
+        viewModel.queryTodoList(date);
     }
 
     @Override
