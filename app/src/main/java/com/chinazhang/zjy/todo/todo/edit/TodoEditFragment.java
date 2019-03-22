@@ -106,6 +106,13 @@ public class TodoEditFragment extends AbsBindingFragment<TodoListViewModel, Frag
                     model.setRemindType(0);
                 }
                 viewModel.addTodo(model);
+//                for (int i = 0; i < 5; i++) {
+//                    TodoModel a = new TodoModel("content" + i, "title" + i);
+//                    a.setRemindTime(0);
+//                    a.setRemindType(0);
+//                    a.setCreateTime(System.currentTimeMillis() - 24 * 60 * 60 * 1000 * (i + 1));
+//                    viewModel.addTodo(a);
+//                }
                 text = "添加成功";
             } else {
                 model.setContent(binding.todoContent.getText().toString());

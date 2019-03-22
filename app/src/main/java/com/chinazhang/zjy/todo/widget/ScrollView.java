@@ -431,26 +431,24 @@ public class ScrollView extends FrameLayout {
     }
 
     public void openBtn() {
-        if (isOpenBtn) {
-            return;
+        if (!isOpenBtn) {
+            if (btnChangeListener != null) {
+                btnChangeListener.onChange(true);
+            }
         }
         isOpenBtn = true;
-        if (btnChangeListener != null) {
-            btnChangeListener.onChange(true);
-        }
-        scroll = -getBtnWidth();
+        scroll = getScroll();
         requestLayout();
     }
 
     public void closeBtn() {
-        if (!isOpenBtn) {
-            return;
+        if (isOpenBtn) {
+            if (btnChangeListener != null) {
+                btnChangeListener.onChange(false);
+            }
         }
         isOpenBtn = false;
-        if (btnChangeListener != null) {
-            btnChangeListener.onChange(false);
-        }
-        scroll = 0;
+        scroll = getScroll();
         requestLayout();
     }
 

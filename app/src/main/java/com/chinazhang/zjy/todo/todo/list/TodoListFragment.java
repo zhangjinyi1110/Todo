@@ -60,6 +60,7 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
             @Override
             public void onChanged(@Nullable List<TodoModel> todoModels) {
                 if (todoModels != null) {
+                    Log.e(TAG, "onChanged: " + date);
                     adapter.setList(todoModels);
                 }
             }
@@ -94,7 +95,7 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
                             case ScrollView.TYPE_CANCEL:
                                 new AlertDialog.Builder(getSelfActivity())
                                         .setTitle("删除")
-                                        .setMessage("确定删除订单？")
+                                        .setMessage("确定删除？")
                                         .setNegativeButton("确定", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -172,15 +173,15 @@ public class TodoListFragment extends AbsBindingFragment<TodoListViewModel, Frag
     @SuppressWarnings("unchecked")
     @Override
     public void initEvent() {
-        binding.fabAdd.setOnClickListener(this);
-        binding.refreshTodo.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                viewModel.queryTodoList(date);
-                if (binding.refreshTodo.isRefreshing())
-                    binding.refreshTodo.setRefreshing(false);
-            }
-        });
+//        binding.fabAdd.setOnClickListener(this);
+//        binding.refreshTodo.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                viewModel.queryTodoList(date);
+//                if (binding.refreshTodo.isRefreshing())
+//                    binding.refreshTodo.setRefreshing(false);
+//            }
+//        });
     }
 
     @Override

@@ -1,10 +1,11 @@
 package com.chinazhang.zjy.todo.todo.list;
 
 import android.arch.lifecycle.Observer;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.view.View;
 
 import com.chinazhang.zjy.todo.R;
@@ -12,8 +13,9 @@ import com.chinazhang.zjy.todo.databinding.ActivityTodoListBinding;
 import com.chinazhang.zjy.todo.todo.TimeModel;
 import com.chinazhang.zjy.todo.todo.TodoListViewModel;
 import com.chinazhang.zjy.todo.todo.TodoModel;
+import com.chinazhang.zjy.todo.todo.edit.TodoEditActivity;
+import com.chinazhang.zjy.todo.utils.FragmentUtils;
 import com.chinazhang.zjy.todo.utils.TimeUtils;
-import com.zjy.simplemodule.base.activity.SimpleActivity;
 import com.zjy.simplemodule.base.activity.VMBindingActivity;
 
 import java.util.ArrayList;
@@ -23,6 +25,9 @@ public class TodoListActivity extends VMBindingActivity<TodoListViewModel, Activ
 
     private List<TimeModel> timeModels;
     private List<TodoModel> todoModels;
+    private List<String> dateList;
+    private List<Fragment> fragments;
+    private Fragment currFragment;
 
     @Override
     public int layoutId() {
@@ -31,6 +36,8 @@ public class TodoListActivity extends VMBindingActivity<TodoListViewModel, Activ
 
     @Override
     public void init(Bundle savedInstanceState) {
+        dateList = new ArrayList<>();
+        fragments = new ArrayList<>();
         viewModel.getTodoListData().observe(this, new Observer<List<TodoModel>>() {
             @Override
             public void onChanged(@Nullable List<TodoModel> todoModels) {
@@ -55,11 +62,34 @@ public class TodoListActivity extends VMBindingActivity<TodoListViewModel, Activ
                 }
             }
         });
+        binding.todoTab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() < fragments.size())
+                    currFragment = FragmentUtils.showOrHide(getSupportFragmentManager(), getLayoutId(), fragments.get(tab.getPosition()), currFragment);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     @Override
     public void initEvent() {
-
+        binding.fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getSelf(), TodoEditActivity.class)
+                        .putExtra("action", "add"));
+            }
+        });
     }
 
     @Override
@@ -68,9 +98,11 @@ public class TodoListActivity extends VMBindingActivity<TodoListViewModel, Activ
     }
 
     private void addTab() {
-        final List<String> dateList = new ArrayList<>();
         if (timeModels != null)
             for (TimeModel model : timeModels) {
+                if (dateList.contains(model.getDate())) {
+                    continue;
+                }
                 dateList.add(model.getDate());
             }
         if (todoModels != null) {
@@ -82,33 +114,26 @@ public class TodoListActivity extends VMBindingActivity<TodoListViewModel, Activ
                 dateList.add(date);
             }
         }
-        final List<Fragment> fragments = new ArrayList<>();
-        for (String date : dateList) {
-            binding.todoTab.addTab(binding.todoTab.newTab().setText(date));
-            fragments.add(TodoListFragment.newInstance(date));
+        for (int i = 0; i < dateList.size(); i++) {
+            if (binding.todoTab.getTabCount() < i && binding.todoTab.getTabAt(i).getText().equals(dateList.get(i))) {
+                continue;
+            }
+            binding.todoTab.addTab(binding.todoTab.newTab().setText(dateList.get(i)));
+            fragments.add(TodoListFragment.newInstance(dateList.get(i)));
         }
-        binding.todoPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int i) {
-                return fragments.get(i);
-            }
+        if (fragments.size() > 0 && currFragment == null) {
+            currFragment = fragments.get(0);
+            FragmentUtils.add(getSupportFragmentManager(), getLayoutId(), currFragment);
+        }
+    }
 
-            @Override
-            public int getCount() {
-                return fragments.size();
-            }
-
-            @Nullable
-            @Override
-            public CharSequence getPageTitle(int position) {
-                return dateList.get(position);
-            }
-        });
+    private int getLayoutId() {
+        return R.id.todo_item;
     }
 
     private void showDate(boolean flag) {
         binding.todoEmpty.setVisibility(flag ? View.GONE : View.VISIBLE);
-        binding.todoPager.setVisibility(flag ? View.VISIBLE : View.GONE);
+        binding.todoItem.setVisibility(flag ? View.VISIBLE : View.GONE);
         binding.todoTab.setVisibility(flag ? View.VISIBLE : View.GONE);
     }
 }
